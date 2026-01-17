@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Shareholder</title>
+</head>
+<body>
+    <h1>Search Shareholder</h1>
+    <form method="get">
+        <input type="text" name="q" placeholder="Enter ID number" value="{{ query }}">
+        <button type="submit">Search</button>
+    </form>
+
+    {% if shareholder %}
+        <h2>{{ shareholder.full_name }} ({{ shareholder.id_number }})</h2>
+        <img src="{{ shareholder.photo.url }}" width="150">
+        <p>Total Shares: {{ total_shares }}</p>
+        <a href="{% url 'shareholders:update_shares' shareholder.id %}">Update Shares</a>
+        <a href="{% url 'shareholders:shareholder_report' shareholder.id %}">Print Report</a>
+    {% elif query %}
+        <p>No shareholder found.</p>
+    {% endif %}
+
+    <p><a href="{% url 'shareholders:home' %}">Home</a></p>
+</body>
+</html>
