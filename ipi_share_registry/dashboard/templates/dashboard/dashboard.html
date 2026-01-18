@@ -3,11 +3,11 @@
 
 {% block content %}
 <div class="dashboard-container">
-    <!-- Welcome Section -->
+    <!-- Welcome -->
     <div class="welcome-section mb-4">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
-                <h2 class="mb-1">Welcome {{ request.user.get_full_name|default:request.user.username }}!</h2>
+                <h2>Welcome {{ request.user.get_full_name|default:request.user.username }}!</h2>
                 <p class="text-muted">Here's what's happening with your registry today.</p>
             </div>
         </div>
@@ -20,7 +20,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase text-muted mb-1">Total Shareholders</h6>
-                        <h2 class="mb-0">{{ total_shareholders }}</h2>
+                        <h2>{{ total_shareholders }}</h2>
                     </div>
                     <div class="stat-icon bg-primary-light">
                         <i class="fas fa-users text-primary"></i>
@@ -33,7 +33,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase text-muted mb-1">Total Directors</h6>
-                        <h2 class="mb-0">{{ total_directors }}</h2>
+                        <h2>{{ total_directors }}</h2>
                     </div>
                     <div class="stat-icon bg-success-light">
                         <i class="fas fa-user-tie text-success"></i>
@@ -46,7 +46,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase text-muted mb-1">Total Shares</h6>
-                        <h2 class="mb-0">{{ total_shares|floatformat:0 }}</h2>
+                        <h2>{{ total_shares|floatformat:0 }}</h2>
                     </div>
                     <div class="stat-icon bg-warning-light">
                         <i class="fas fa-chart-pie text-warning"></i>
@@ -59,7 +59,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase text-muted mb-1">New (30d)</h6>
-                        <h2 class="mb-0">{{ new_shareholders }}</h2>
+                        <h2>{{ new_shareholders }}</h2>
                     </div>
                     <div class="stat-icon bg-info-light">
                         <i class="fas fa-user-plus text-info"></i>
@@ -74,7 +74,7 @@
         <div class="col-lg-8">
             <div class="card h-100">
                 <div class="card-header">
-                    <h5 class="mb-0">Shareholder Growth</h5>
+                    <h5>Shareholder Growth</h5>
                 </div>
                 <div class="card-body">
                     <canvas id="growthChart" height="300"></canvas>
@@ -84,7 +84,7 @@
         <div class="col-lg-4">
             <div class="card h-100">
                 <div class="card-header">
-                    <h5 class="mb-0">Share Distribution</h5>
+                    <h5>Share Distribution</h5>
                 </div>
                 <div class="card-body">
                     <canvas id="shareDistribution"></canvas>
@@ -93,12 +93,12 @@
         </div>
     </div>
 
-    <!-- Recent Transactions and Upcoming Events -->
+    <!-- Recent Transactions -->
     <div class="row g-3">
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Recent Transactions</h5>
+                <div class="card-header d-flex justify-content-between">
+                    <h5>Recent Transactions</h5>
                     <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
                 </div>
                 <div class="table-responsive">
@@ -150,10 +150,11 @@
             </div>
         </div>
 
+        <!-- Upcoming Events -->
         <div class="col-lg-4">
             <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Upcoming Events</h5>
+                <div class="card-header d-flex justify-content-between">
+                    <h5>Upcoming Events</h5>
                     <a href="#" class="btn btn-sm btn-outline-primary">+ Add</a>
                 </div>
                 <div class="card-body p-0">
@@ -161,12 +162,12 @@
                         {% for event in upcoming_events %}
                             <div class="list-group-item border-0">
                                 <div class="d-flex align-items-center">
-                                    <div class="d-flex flex-column text-center me-3" style="min-width: 50px;">
+                                    <div class="d-flex flex-column text-center me-3" style="min-width:50px;">
                                         <div class="fw-bold">{{ event.date|date:"d" }}</div>
                                         <small class="text-muted">{{ event.date|date:"M" }}</small>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1">{{ event.title }}</h6>
+                                        <h6>{{ event.title }}</h6>
                                         <p class="small text-muted mb-0">{{ event.time }}</p>
                                     </div>
                                 </div>
@@ -189,15 +190,36 @@
 const growthCtx = document.getElementById('growthChart').getContext('2d');
 const growthChart = new Chart(growthCtx, {
     type: 'line',
-    data: { labels: {{ months|safe }}, datasets:[{label:'New Shareholders', data:{{ new_counts|safe }}, borderColor:'#0d6efd', backgroundColor:'rgba(13,110,253,0.1)', fill:true, tension:0.3}]},
+    data: {
+        labels: {{ months|safe }},
+        datasets: [{
+            label:'New Shareholders',
+            data: {{ new_counts|safe }},
+            borderColor:'#0d6efd',
+            backgroundColor:'rgba(13,110,253,0.1)',
+            fill:true,
+            tension:0.3
+        }]
+    },
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
 });
 
 const shareCtx = document.getElementById('shareDistribution').getContext('2d');
 const shareChart = new Chart(shareCtx, {
-    type:'doughnut',
-    data:{labels:['Common Shares','Preferred Shares','Other'], datasets:[{data:[{{ common_shares }}, {{ preferred_shares }}, {{ other_shares }}], backgroundColor:['#0d6efd','#198754','#ffc107'], cutout:'70%'}]},
-    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+    type: 'doughnut',
+    data: {
+        labels: ['Common Shares','Preferred Shares','Other'],
+        datasets:[{
+            data: [
+                {{ share_distribution.common }},
+                {{ share_distribution.preferred }},
+                {{ share_distribution.other }}
+            ],
+            backgroundColor: ['#0d6efd','#198754','#ffc107'],
+            borderWidth: 1
+        }]
+    },
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}, cutout:'70%'}
 });
 </script>
 {% endblock %}
