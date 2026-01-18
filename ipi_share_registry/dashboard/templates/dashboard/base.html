@@ -62,9 +62,10 @@
         .content { 
             flex-grow: 1; 
             background-color: #f8f9fa; 
-            padding: 20px;
+            padding: 20px 20px 80px; /* Added bottom padding to prevent content from being hidden under footer */
             min-height: calc(100vh - 40px); /* Viewport height minus footer */
             margin-top: 60px; /* Space for topbar */
+            margin-bottom: 60px; /* Space for footer */
         }
         
         /* Welcome Section */
@@ -114,10 +115,9 @@
             width: 100%;
             padding: 10px 20px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            flex-direction: row;
+            justify-content: space-between;
             align-items: center;
-            gap: 5px;
         }
         .developer-credit {
             font-size: 0.8rem;
@@ -209,8 +209,8 @@
 </div>
 
 <div class="footer">
-    <div class="container">
-        <div>&copy; {% now "Y" %} iPi Share Registry. All Rights Reserved.</div>
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="copyright">&copy; {% now "Y" %} iPi Share Registry. All Rights Reserved.</div>
         <div class="developer-credit">
             Developed by <a href="https://www.atech-png.com/" target="_blank" rel="noopener noreferrer">Nextdev-PNG</a>
         </div>
