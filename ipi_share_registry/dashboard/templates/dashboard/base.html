@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}iPi Share Registry{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'dashboard/ipi_logo.png' %}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{% static 'dashboard/ipi_logo.png' %}" sizes="16x16">
+    <link rel="apple-touch-icon" href="{% static 'dashboard/ipi_logo.png' %}">
+    <meta name="msapplication-TileImage" content="{% static 'dashboard/ipi_logo.png' %}">
+    <style>
+        body { 
+            min-height: 100vh; 
+            margin: 0; 
+            font-family: Arial, sans-serif;
+            position: relative;
+            padding-left: 220px; /* Space for fixed sidebar */
+        }
+        .main-wrapper { 
+            display: flex; 
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar { 
+            width: 220px; 
+            background-color: #0d6efd; 
+            color: white; 
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            display: flex; 
+            flex-direction: column; 
+            padding: 15px 0;
+            z-index: 1000;
+        }
+        .sidebar-logo { text-align: center; margin-bottom: 20px; }
+        .sidebar-logo a { 
+            text-decoration: none; 
+            color: inherit; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .sidebar-logo img { max-width: 90px; display: block; margin: 0 auto 5px; }
+        .sidebar-logo h6 { font-size: 0.85rem; margin: 0; }
+        .menu-items { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .menu-section { margin-bottom: 15px; }
+        .menu-section-title { color: rgba(255,255,255,0.7); font-size: 11px; text-transform: uppercase; padding: 8px 20px 5px; margin-top: 10px; letter-spacing: 0.5px; }
+        .sidebar a { color: white; display: flex; align-items: center; width: 100%; padding: 8px 20px; text-decoration: none; margin-bottom: 2px; font-size: 0.85rem; transition: all 0.2s; }
+        .sidebar a i { width: 22px; margin-right: 10px; text-align: center; font-size: 14px; }
+        .sidebar a:hover { background-color: rgba(255,255,255,0.1); padding-left: 25px; }
+        .sidebar a.active { background-color: rgba(255,255,255,0.15); border-left: 3px solid #fff; }
+
+        .logout-container { margin-top: auto; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.15); }
+        .logout-link { display: flex !important; align-items: center; padding: 8px 20px !important; color: rgba(255,255,255,0.8) !important; transition: all 0.2s; }
+        .logout-link i { margin-right: 10px; width: 20px !important; text-align: center; }
+        .logout-link:hover { background-color: rgba(255,255,255,0.1) !important; color: #fff !important; padding-left: 25px !important; }
+
+        /* Content */
+        .content { 
+            flex-grow: 1; 
+            background-color: #f8f9fa; 
+            padding: 20px 20px 80px; /* Added bottom padding to prevent content from being hidden under footer */
+            min-height: calc(100vh - 40px); /* Viewport height minus footer */
+            margin-top: 60px; /* Space for topbar */
+            margin-bottom: 60px; /* Space for footer */
+        }
+        
+        /* Welcome Section */
+        .welcome-section {
+            padding-left: 20px;
+        }
+
+        /* Topbar */
+        .topbar { 
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 220px; /* Same as sidebar width */
+            display: flex; 
+            justify-content: flex-end; 
+            align-items: center; 
+            padding: 10px 25px; 
+            background-color: white; 
+            border-bottom: 1px solid #ddd;
+            z-index: 999;
+            height: 60px;
+        }
+        .topbar .user-info { 
+            display: flex; 
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 5px 15px;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .topbar .user-info img { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; }
+        
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 220px; /* Same as sidebar width */
+            right: 0;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            padding: 10px 0;
+            min-height: 60px;
+            z-index: 1000;
+            text-align: center;
+        }
+        .footer .container {
+            width: 100%;
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .developer-credit {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+        .developer-credit a {
+            color: #0d6efd;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .developer-credit a:hover {
+            color: #0a58ca;
+            text-decoration: underline;
+        }
+
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="main-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <a href="{% url 'dashboard:dashboard' %}">
+                <img src="{% static 'dashboard/ipi_logo.png' %}" alt="iPi Logo">
+                <h6>iPi Share Registry</h6>
+            </a>
+        </div>
+
+        <div class="menu-items">
+            <div class="menu-section">
+                <div class="menu-section-title">Main</div>
+                <a href="{% url 'dashboard:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">Registry</div>
+                <a href="{% url 'dashboard:share_register' %}" class="{% if request.resolver_match.url_name == 'share_register' %}active{% endif %}">
+                    <i class="fas fa-book"></i> Share Registry
+                </a>
+                <a href="{% url 'dashboard:shareholders' %}" class="{% if request.resolver_match.url_name == 'shareholders' %}active{% endif %}">
+                    <i class="fas fa-users"></i> Share Holders
+                </a>
+                <a href="{% url 'dashboard:transaction_history' %}" class="{% if request.resolver_match.url_name == 'transaction_history' %}active{% endif %}">
+                    <i class="fas fa-exchange-alt"></i> Transaction History
+                </a>
+                <a href="{% url 'dashboard:directors' %}" class="{% if request.resolver_match.url_name == 'directors' %}active{% endif %}">
+                    <i class="fas fa-user-tie"></i> Directors
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">System</div>
+                <a href="{% url 'dashboard:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="{% url 'dashboard:help' %}" class="{% if request.resolver_match.url_name == 'help' %}active{% endif %}">
+                    <i class="far fa-question-circle"></i> Help
+                </a>
+            </div>
+        </div>
+
+        <div class="logout-container">
+            <form action="{% url 'logout' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="logout-link" style="background: none; border: none; width: 100%; text-align: left;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="user-info">
+            <img src="{% static 'dashboard/ipi_logo.png' %}" alt="User Icon">
+            <span>{{ request.user.username }}</span>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<div class="footer">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="copyright">&copy; {% now "Y" %} iPi Share Registry. All Rights Reserved.</div>
+        <div class="developer-credit">
+            Developed by <a href="https://www.atech-png.com/" target="_blank" rel="noopener noreferrer">Nextdev-PNG</a>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}{% endblock %}
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

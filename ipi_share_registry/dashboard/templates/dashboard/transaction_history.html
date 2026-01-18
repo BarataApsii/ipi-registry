@@ -1,0 +1,532 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Transaction History{% endblock %}
+
+{% block extra_css %}
+<style>
+    .summary-card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    .summary-card:hover {
+        transform: translateY(-5px);
+    }
+    .card-1 { background: linear-gradient(45deg, #4e73df, #224abe); }
+    .card-2 { background: linear-gradient(45deg, #1cc88a, #13855c); }
+    .card-3 { background: linear-gradient(45deg, #f6c23e, #dda20a); }
+    .card-4 { background: linear-gradient(45deg, #e74a3b, #be2617); }
+    .summary-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+    .table-responsive {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        padding: 20px;
+    }
+    .search-box {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .action-buttons .btn {
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+    .transaction-type {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .type-issue { background-color: #e3f2fd; color: #1565c0; }
+    .type-transfer { background-color: #e8f5e9; color: #2e7d32; }
+    .type-buyback { background-color: #fff3e0; color: #e65100; }
+    .type-conversion { background-color: #f3e5f5; color: #7b1fa2; }
+    .transaction-amount {
+        font-weight: 600;
+    }
+    .transaction-positive { color: #2e7d32; }
+    .transaction-negative { color: #c62828; }
+    .date-picker {
+        max-width: 200px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Transaction History</h3>
+        <div class="action-buttons">
+            <button class="btn btn-outline-secondary" id="exportButton">
+                <i class="fas fa-download me-1"></i> Export
+            </button>
+            <button class="btn btn-outline-secondary" id="printButton">
+                <i class="fas fa-print me-1"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="summary-card card-1">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total Transactions</h6>
+                        <h3 class="mb-0">{{ transactions|length }}</h3>
+                    </div>
+                    <i class="fas fa-exchange-alt summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 8.2%</span>
+                    <span>Since last month</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card card-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Shares Issued</h6>
+                        <h3 class="mb-0">25,000</h3>
+                    </div>
+                    <i class="fas fa-plus-circle summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 5.3%</span>
+                    <span>Since last month</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card card-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Shares Transferred</h6>
+                        <h3 class="mb-0">12,500</h3>
+                    </div>
+                    <i class="fas fa-random summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 3.1%</span>
+                    <span>Since last month</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card card-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total Value</h6>
+                        <h3 class="mb-0">$125,000</h3>
+                    </div>
+                    <i class="fas fa-dollar-sign summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 12.5%</span>
+                    <span>Since last month</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="search-box">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Date Range</label>
+                <div class="input-group">
+                    <input type="date" class="form-control date-picker" id="startDate">
+                    <span class="input-group-text">to</span>
+                    <input type="date" class="form-control date-picker" id="endDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Transaction Type</label>
+                <select class="form-select" id="transactionType">
+                    <option value="">All Types</option>
+                    <option value="issue">Share Issue</option>
+                    <option value="transfer">Transfer</option>
+                    <option value="buyback">Buyback</option>
+                    <option value="conversion">Conversion</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Shareholder</label>
+                <select class="form-select" id="shareholderFilter">
+                    <option value="">All Shareholders</option>
+                    {% for shareholder in shareholders %}
+                    <option value="{{ shareholder.id }}">{{ shareholder.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary w-100" id="applyFilters">
+                    <i class="fas fa-filter me-2"></i>Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction History Table -->
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Transaction Log</h5>
+            <div class="input-group" style="max-width: 300px;">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" placeholder="Search transactions..." id="searchTransactions">
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="transactionsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Transaction ID</th>
+                        <th>Shareholder</th>
+                        <th>Type</th>
+                        <th>Details</th>
+                        <th>Shares</th>
+                        <th>Value</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in transactions %}
+                    <tr>
+                        <td>
+                            <div class="fw-bold">{{ txn.created_at|date:"M d, Y" }}</div>
+                            <small class="text-muted">{{ txn.created_at|time:"H:i" }}</small>
+                        </td>
+                        <td>#{{ txn.id|stringformat:"06d" }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{% static 'dashboard/ipi_logo.png' %}" alt="Shareholder" class="shareholder-avatar me-2">
+                                <div>
+                                    <div class="fw-bold">{{ txn.shareholder.full_name }}</div>
+                                    <small class="text-muted">{{ txn.shareholder.id_number|default:"ID: N/A" }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if txn.transaction_type == 'issue' %}
+                                <span class="transaction-type type-issue">Issue</span>
+                            {% elif txn.transaction_type == 'transfer' %}
+                                <span class="transaction-type type-transfer">Transfer</span>
+                            {% elif txn.transaction_type == 'buyback' %}
+                                <span class="transaction-type type-buyback">Buyback</span>
+                            {% else %}
+                                <span class="transaction-type type-conversion">{{ txn.transaction_type|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="text-nowrap">
+                                <div class="fw-bold">{{ txn.get_transaction_type_display }}</div>
+                                <small class="text-muted">Ref: {{ txn.reference|default:"N/A" }}</small>
+                            </div>
+                        </td>
+                        <td class="transaction-amount {% if txn.shares > 0 %}transaction-positive{% else %}transaction-negative{% endif %}">
+                            {% if txn.shares > 0 %}+{% endif %}{{ txn.shares }}
+                        </td>
+                        <td>${{ txn.price_per_share|default:0|floatformat:2 }}</td>
+                        <td>
+                            {% if txn.status == 'completed' %}
+                                <span class="badge bg-success">Completed</span>
+                            {% elif txn.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ txn.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" title="View Details" 
+                                        onclick="viewTransaction({{ txn.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" title="Print Receipt"
+                                        onclick="printReceipt({{ txn.id }})">
+                                    <i class="fas fa-receipt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="fas fa-exchange-alt fa-2x mb-2"></i>
+                                <p class="mb-0">No transactions found. Try adjusting your filters.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if transactions.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if transactions.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ transactions.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                </li>
+                {% endif %}
+
+                {% for i in transactions.paginator.page_range %}
+                    {% if transactions.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if transactions.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ transactions.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Transaction Details Modal -->
+<div class="modal fade" id="transactionDetailsModal" tabindex="-1" aria-labelledby="transactionDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="transactionDetailsModalLabel">Transaction Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="transactionDetailsContent">
+                <!-- Content will be loaded via JavaScript -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="printTransactionBtn">
+                    <i class="fas fa-print me-1"></i> Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Set default date range (last 30 days)
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
+        
+        document.getElementById('startDate').valueAsDate = startDate;
+        document.getElementById('endDate').valueAsDate = endDate;
+
+        // Search functionality
+        document.getElementById('searchTransactions').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#transactionsTable tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Apply filters
+        document.getElementById('applyFilters').addEventListener('click', function() {
+            // In a real app, this would submit a form or make an AJAX call
+            // For now, we'll just show a message
+            const type = document.getElementById('transactionType').value;
+            const shareholder = document.getElementById('shareholderFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            // Show loading state
+            const applyBtn = this;
+            const originalText = applyBtn.innerHTML;
+            applyBtn.disabled = true;
+            applyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Applying...';
+            
+            // Simulate API call
+            setTimeout(() => {
+                // In a real app, you would submit the form or make an AJAX call here
+                console.log('Filters applied:', { type, shareholder, startDate, endDate });
+                
+                // Reset button
+                applyBtn.disabled = false;
+                applyBtn.innerHTML = originalText;
+                
+                // Show success message
+                showAlert('Filters applied successfully!', 'success');
+            }, 1000);
+        });
+
+        // Export functionality
+        document.getElementById('exportButton').addEventListener('click', function() {
+            // Implement export to CSV/Excel
+            showAlert('Exporting transaction data...', 'info');
+            // Simulate export
+            setTimeout(() => {
+                showAlert('Export completed successfully!', 'success');
+            }, 1500);
+        });
+
+        // Print functionality
+        document.getElementById('printButton').addEventListener('click', function() {
+            window.print();
+        });
+    });
+
+    // View transaction details
+    function viewTransaction(transactionId) {
+        const modal = new bootstrap.Modal(document.getElementById('transactionDetailsModal'));
+        const content = document.getElementById('transactionDetailsContent');
+        
+        // Show loading state
+        content.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading transaction details...</p>
+            </div>
+        `;
+        
+        // Show modal
+        modal.show();
+        
+        // In a real app, you would fetch the transaction details via AJAX
+        // This is a simulation
+        setTimeout(() => {
+            // Mock data - replace with actual data from your API
+            const mockData = {
+                id: transactionId,
+                date: new Date().toLocaleDateString(),
+                type: 'Share Transfer',
+                status: 'Completed',
+                reference: 'TX' + String(transactionId).padStart(6, '0'),
+                shares: 100,
+                pricePerShare: 10.50,
+                total: 1050.00,
+                from: 'John Smith',
+                to: 'Jane Doe',
+                notes: 'Quarterly share transfer as per agreement.'
+            };
+            
+            // Update modal content
+            content.innerHTML = `
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Transaction #${mockData.reference}</h5>
+                        <p class="mb-1"><strong>Date:</strong> ${mockData.date}</p>
+                        <p class="mb-1"><strong>Type:</strong> <span class="badge bg-primary">${mockData.type}</span></p>
+                        <p class="mb-1"><strong>Status:</strong> <span class="badge bg-success">${mockData.status}</span></p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <h3 class="text-primary">${mockData.shares} Shares</h3>
+                        <p class="mb-1"><strong>Price per Share:</strong> $${mockData.pricePerShare.toFixed(2)}</p>
+                        <p class="mb-1"><strong>Total Value:</strong> $${mockData.total.toFixed(2)}</p>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Transaction Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>From:</strong> ${mockData.from}</p>
+                                <p class="mb-0"><strong>To:</strong> ${mockData.to}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Reference:</strong> ${mockData.reference}</p>
+                                <p class="mb-0"><strong>Notes:</strong> ${mockData.notes}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This transaction was processed on ${mockData.date} and is marked as ${mockData.status.toLowerCase()}.
+                </div>
+            `;
+            
+            // Add event listener for print button
+            document.getElementById('printTransactionBtn').onclick = function() {
+                window.print();
+            };
+        }, 1000);
+    }
+    
+    // Print receipt
+    function printReceipt(transactionId) {
+        // In a real app, this would open a print-friendly version of the receipt
+        showAlert(`Printing receipt for transaction #${transactionId}...`, 'info');
+    }
+    
+    // Helper function to show alerts
+    function showAlert(message, type = 'info') {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        
+        // Create and show alert
+        const alertDiv = document.createElement('div');
+        alertDiv.innerHTML = alertHtml;
+        document.querySelector('.container-fluid.py-4').prepend(alertDiv);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            const alert = new bootstrap.Alert(alertDiv.querySelector('.alert'));
+            alert.close();
+        }, 5000);
+    }
+</script>
+{% endblock %}

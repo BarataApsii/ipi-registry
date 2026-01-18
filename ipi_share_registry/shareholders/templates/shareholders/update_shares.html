@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Shares</title>
+</head>
+<body>
+    <h1>Update Shares for {{ shareholder.full_name }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label>Transaction Type:</label>
+        <select name="transaction_type">
+            <option value="ADD">Add Shares</option>
+            <option value="REMOVE">Remove Shares</option>
+        </select><br><br>
+
+        <label>Shares:</label>
+        <input type="number" name="shares" required><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+    <p><a href="{% url 'shareholders:search_shareholder' %}">Back to Search</a></p>
+</body>
+</html>

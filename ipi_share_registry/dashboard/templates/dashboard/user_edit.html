@@ -1,0 +1,32 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Edit User{% endblock %}
+
+{% block content %}
+<div class="container p-4">
+    <h3>Edit User - {{ user_obj.username }}</h3>
+    <form method="POST">{% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">First Name</label>
+            <input type="text" name="first_name" class="form-control" value="{{ user_obj.first_name }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="last_name" class="form-control" value="{{ user_obj.last_name }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password (leave blank to keep current)</label>
+            <input type="password" name="password" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Group / Role</label>
+            <select name="group" class="form-select">
+                <option value="">-- Select Group --</option>
+                {% for group in groups %}
+                <option value="{{ group.id }}" {% if group in user_obj.groups.all %}selected{% endif %}>{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-success">Update User</button>
+    </form>
+</div>
+{% endblock %}

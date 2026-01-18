@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shareholder Report</title>
+</head>
+<body>
+    <h1>Report for {{ shareholder.full_name }}</h1>
+    <img src="{{ shareholder.photo.url }}" width="150">
+    <p>ID Number: {{ shareholder.id_number }}</p>
+    <p>Total Shares: {{ total_shares }}</p>
+
+    <button onclick="window.print()">Print</button>
+    <p><a href="{% url 'shareholders:search_shareholder' %}">Back to Search</a></p>
+</body>
+</html>

@@ -1,0 +1,588 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    .settings-card:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .settings-card .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 15px 20px;
+        font-weight: 600;
+        color: #495057;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .settings-card .card-body {
+        padding: 20px;
+    }
+    .nav-settings .nav-link {
+        color: #495057;
+        border-radius: 5px;
+        padding: 10px 15px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .nav-settings .nav-link.active {
+        background-color: #e9f0ff;
+        color: #4e73df;
+        font-weight: 500;
+    }
+    .nav-settings .nav-link i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin: 0 auto 20px;
+        display: block;
+    }
+    .settings-section {
+        margin-bottom: 30px;
+    }
+    .settings-section h5 {
+        color: #495057;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .form-label {
+        font-weight: 500;
+    }
+    .theme-color-option {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 10px;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    .theme-color-option.active {
+        border-color: #4e73df;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="settings-card">
+                <div class="card-body p-0">
+                    <div class="text-center p-4 border-bottom">
+                        <img src="{% static 'dashboard/default-avatar.png' %}" alt="User" class="profile-avatar">
+                        <h5 class="mb-1">{{ request.user.get_full_name|default:request.user.username }}</h5>
+                        <p class="text-muted mb-0">Administrator</p>
+                    </div>
+                    <div class="p-3">
+                        <nav class="nav flex-column nav-settings">
+                            <a class="nav-link active" href="#profile" data-bs-toggle="tab">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a class="nav-link" href="#security" data-bs-toggle="tab">
+                                <i class="fas fa-lock"></i> Security
+                            </a>
+                            <a class="nav-link" href="#notifications" data-bs-toggle="tab">
+                                <i class="fas fa-bell"></i> Notifications
+                            </a>
+                            <a class="nav-link" href="#preferences" data-bs-toggle="tab">
+                                <i class="fas fa-sliders-h"></i> Preferences
+                            </a>
+                            <a class="nav-link" href="#billing" data-bs-toggle="tab">
+                                <i class="fas fa-credit-card"></i> Billing
+                            </a>
+                            <a class="nav-link" href="#system" data-bs-toggle="tab">
+                                <i class="fas fa-cog"></i> System Settings
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-card">
+                <div class="card-header">
+                    <span>Storage</span>
+                    <span class="badge bg-primary">75% Used</span>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 75%" 
+                             aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="mb-0 small text-muted">15.2 GB of 20 GB used</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-9">
+            <div class="tab-content">
+                <!-- Profile Tab -->
+                <div class="tab-pane fade show active" id="profile">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <span>Profile Information</span>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control" value="{{ request.user.first_name }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" value="{{ request.user.last_name }}">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" value="{{ request.user.email }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" placeholder="+1 (555) 123-4567">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Bio</label>
+                                    <textarea class="form-control" rows="3" placeholder="Tell us about yourself..."></textarea>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Tab -->
+                <div class="tab-pane fade" id="security">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <span>Change Password</span>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">Current Password</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">New Password</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">Update Password</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <span>Two-Factor Authentication</span>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="twoFactorSwitch">
+                                <label class="form-check-label" for="twoFactorSwitch"></label>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Add an extra layer of security to your account by enabling two-factor authentication.</p>
+                            <button class="btn btn-outline-primary">Set up authenticator app</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notifications Tab -->
+                <div class="tab-pane fade" id="notifications">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <span>Email Notifications</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="emailAlerts" checked>
+                                <label class="form-check-label" for="emailAlerts">Email Alerts</label>
+                                <p class="text-muted small mb-0">Receive email notifications for important updates</p>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="newsletter" checked>
+                                <label class="form-check-label" for="newsletter">Newsletter</label>
+                                <p class="text-muted small mb-0">Receive our monthly newsletter</p>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="productUpdates">
+                                <label class="form-check-label" for="productUpdates">Product Updates</label>
+                                <p class="text-muted small mb-0">Get notified about new features and updates</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <span>Push Notifications</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="pushAlerts" checked>
+                                <label class="form-check-label" for="pushAlerts">Browser Notifications</label>
+                                <p class="text-muted small mb-0">Allow desktop notifications</p>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="soundAlerts">
+                                <label class="form-check-label" for="soundAlerts">Sound Alerts</label>
+                                <p class="text-muted small mb-0">Play sound for new notifications</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preferences Tab -->
+                <div class="tab-pane fade" id="preferences">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <span>Theme & Display</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <label class="form-label">Color Theme</label>
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-color-option active" style="background-color: #4e73df;" data-theme="default"></div>
+                                    <div class="theme-color-option" style="background-color: #1cc88a;" data-theme="green"></div>
+                                    <div class="theme-color-option" style="background-color: #36b9cc;" data-theme="cyan"></div>
+                                    <div class="theme-color-option" style="background-color: #f6c23e;" data-theme="yellow"></div>
+                                    <div class="theme-color-option" style="background-color: #e74a3b;" data-theme="red"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Language</label>
+                                <select class="form-select">
+                                    <option>English</option>
+                                    <option>Español</option>
+                                    <option>Français</option>
+                                    <option>Deutsch</option>
+                                </select>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="darkMode">
+                                <label class="form-check-label" for="darkMode">Dark Mode</label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="compactMode" checked>
+                                <label class="form-check-label" for="compactMode">Compact Mode</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Billing Tab -->
+                <div class="tab-pane fade" id="billing">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <span>Billing Information</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                You're currently on the <strong>Pro Plan</strong>. Next billing date: <strong>March 15, 2024</strong>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h6>Payment Method</h6>
+                                    <div class="border p-3 rounded">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fab fa-cc-visa fa-2x text-primary me-3"></i>
+                                            <div>
+                                                <p class="mb-0">Visa ending in 4242</p>
+                                                <small class="text-muted">Expires 12/25</small>
+                                            </div>
+                                            <div class="ms-auto">
+                                                <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Billing Address</h6>
+                                    <div class="border p-3 rounded">
+                                        <p class="mb-1">John Doe</p>
+                                        <p class="mb-1">123 Business St.</p>
+                                        <p class="mb-1">San Francisco, CA 94107</p>
+                                        <p class="mb-0">United States</p>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h6>Billing History</h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Description</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Invoice</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Jan 15, 2024</td>
+                                            <td>Pro Plan - Monthly</td>
+                                            <td>$29.99</td>
+                                            <td><span class="badge bg-success">Paid</span></td>
+                                            <td><a href="#">Download</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dec 15, 2023</td>
+                                            <td>Pro Plan - Monthly</td>
+                                            <td>$29.99</td>
+                                            <td><span class="badge bg-success">Paid</span></td>
+                                            <td><a href="#">Download</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Nov 15, 2023</td>
+                                            <td>Pro Plan - Monthly</td>
+                                            <td>$29.99</td>
+                                            <td><span class="badge bg-success">Paid</span></td>
+                                            <td><a href="#">Download</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Settings Tab -->
+                <div class="tab-pane fade" id="system">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> These settings affect all users. Please be careful when making changes.
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <span>System Configuration</span>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">System Name</label>
+                                    <input type="text" class="form-control" value="iPi Share Registry">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Time Zone</label>
+                                    <select class="form-select">
+                                        <option>(UTC-08:00) Pacific Time (US & Canada)</option>
+                                        <option>(UTC-07:00) Mountain Time (US & Canada)</option>
+                                        <option selected>(UTC-05:00) Eastern Time (US & Canada)</option>
+                                        <option>(UTC) London</option>
+                                        <option>(UTC+01:00) Paris, Berlin</option>
+                                        <option>(UTC+08:00) Beijing, Singapore</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Date Format</label>
+                                    <select class="form-select">
+                                        <option>MM/DD/YYYY</option>
+                                        <option>DD/MM/YYYY</option>
+                                        <option>YYYY-MM-DD</option>
+                                        <option>Month D, YYYY</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Default Records Per Page</label>
+                                    <select class="form-select" style="max-width: 150px;">
+                                        <option>10</option>
+                                        <option selected>25</option>
+                                        <option>50</option>
+                                        <option>100</option>
+                                    </select>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">Save System Settings</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <span>Backup & Restore</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Create Backup</h6>
+                                    <p class="text-muted small">Generate a complete backup of your system data.</p>
+                                    <button class="btn btn-outline-primary">
+                                        <i class="fas fa-download me-2"></i>Create Backup
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Restore from Backup</h6>
+                                    <p class="text-muted small">Upload a backup file to restore your system.</p>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="backupFile">
+                                        <button class="btn btn-outline-secondary" type="button">Upload</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="card-header bg-danger text-white">
+                            <span>Danger Zone</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Reset All Settings</h6>
+                                    <p class="mb-0 text-muted small">Reset all system settings to their default values.</p>
+                                </div>
+                                <button class="btn btn-outline-danger">Reset Settings</button>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Delete All Data</h6>
+                                    <p class="mb-0 text-muted small">Permanently delete all data from the system. This cannot be undone.</p>
+                                </div>
+                                <button class="btn btn-outline-danger" disabled>
+                                    <i class="fas fa-trash-alt me-1"></i> Delete All Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Theme color selection
+        const themeOptions = document.querySelectorAll('.theme-color-option');
+        themeOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove active class from all options
+                themeOptions.forEach(opt => opt.classList.remove('active'));
+                // Add active class to clicked option
+                this.classList.add('active');
+                // In a real app, you would apply the selected theme
+                // document.documentElement.setAttribute('data-theme', this.getAttribute('data-theme'));
+            });
+        });
+        
+        // Tab persistence
+        const tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
+        tabLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                localStorage.setItem('activeTab', this.getAttribute('href'));
+            });
+        });
+        
+        // Activate saved tab or default to first tab
+        const activeTab = localStorage.getItem('activeTab');
+        if (activeTab) {
+            const tabTrigger = new bootstrap.Tab(document.querySelector(`a[href="${activeTab}"]`));
+            tabTrigger.show();
+        }
+        
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkMode');
+        if (darkModeToggle) {
+            // Check for saved user preference, if any
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.checked = true;
+            }
+            
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+        }
+    });
+    
+    // Add dark mode styles if needed
+    const style = document.createElement('style');
+    style.textContent = `
+        .dark-mode {
+            background-color: #1a1a2e;
+            color: #f8f9fa;
+        }
+        .dark-mode .settings-card {
+            background-color: #16213e;
+            border-color: #2d3748;
+        }
+        .dark-mode .settings-card .card-header {
+            background-color: #0f3460;
+            border-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .dark-mode .form-control, 
+        .dark-mode .form-select {
+            background-color: #1a1a2e;
+            border-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .dark-mode .form-control:focus, 
+        .dark-mode .form-select:focus {
+            background-color: #1a1a2e;
+            border-color: #4e73df;
+            color: #e2e8f0;
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+        }
+        .dark-mode .text-muted {
+            color: #a0aec0 !important;
+        }
+        .dark-mode .nav-settings .nav-link {
+            color: #e2e8f0;
+        }
+        .dark-mode .nav-settings .nav-link.active {
+            background-color: #2c3e50;
+            color: #4e73df;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}
