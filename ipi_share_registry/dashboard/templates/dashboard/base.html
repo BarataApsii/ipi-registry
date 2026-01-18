@@ -80,7 +80,7 @@
                 <a href="{% url 'dashboard:shareholders' %}" class="{% if request.resolver_match.url_name == 'shareholders' %}active{% endif %}">
                     <i class="fas fa-users"></i> Share Holders
                 </a>
-                <a href="{% url 'dashboard:transactions' %}" class="{% if request.resolver_match.url_name == 'transactions' %}active{% endif %}">
+                <a href="{% url 'dashboard:transaction_history' %}" class="{% if request.resolver_match.url_name == 'transaction_history' %}active{% endif %}">
                     <i class="fas fa-exchange-alt"></i> Transaction History
                 </a>
                 <a href="{% url 'dashboard:directors' %}" class="{% if request.resolver_match.url_name == 'directors' %}active{% endif %}">
