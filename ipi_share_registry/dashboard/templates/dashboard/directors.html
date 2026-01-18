@@ -1,0 +1,31 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Directors{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h3>Directors</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Position</th>
+                <th>Company</th>
+                <th>Appointed Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for director in directors %}
+            <tr>
+                <td>{{ director.full_name }}</td>
+                <td>{{ director.position }}</td>
+                <td>{{ director.company.name }}</td>
+                <td>{{ director.appointed_date|date:"M d, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">No directors found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

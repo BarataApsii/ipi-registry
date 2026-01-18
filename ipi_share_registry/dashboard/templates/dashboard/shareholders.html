@@ -1,0 +1,31 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Shareholders{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h3>Shareholders</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>ID Number</th>
+                <th>Total Shares</th>
+                <th>Company</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sh in shareholders %}
+            <tr>
+                <td>{{ sh.full_name }}</td>
+                <td>{{ sh.id_number }}</td>
+                <td>{{ sh.total_shares }}</td>
+                <td>{{ sh.company.name }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">No shareholders found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

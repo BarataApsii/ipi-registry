@@ -1,16 +1,13 @@
 from django.contrib import admin
-from django.urls import path
-from django.conf import settings
-from django.conf.urls.static import static
-from django.urls import include
+from django.urls import path, include
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('shareholders.urls')),
-    path('dashboard/', include('dashboard.urls')),
-    path('accounts/', include('accounts.urls')),
+    path('dashboard/', include('dashboard.urls')),  # Dashboard
+    path('shareholders/', include('shareholders.urls')),  # Shareholders app
+    path('accounts/', include('django.contrib.auth.urls')),  # Login/Logout
 
+    # Redirect root URL to login page
+    path('', RedirectView.as_view(url='/accounts/login/', permanent=False)),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

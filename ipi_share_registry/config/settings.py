@@ -29,9 +29,6 @@ INSTALLED_APPS = [
     'shareholders',
     'dashboard',
     'accounts',
-
-
-
 ]
 
 MIDDLEWARE = [
@@ -49,12 +46,13 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # Added BASE_DIR / "templates" so Django finds global templates like login.html
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',
+                'django.template.context_processors.request',  # required for auth templates
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -80,7 +78,6 @@ DATABASES = {
 }
 
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -104,11 +101,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -117,19 +111,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard:dashboard'
-LOGOUT_REDIRECT_URL = 'login'
-
-# Optional: extra folder to collect static files (production)
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
@@ -139,3 +120,10 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication redirects
+LOGIN_URL = '/accounts/login/'  # when login required, go here
+LOGIN_REDIRECT_URL = '/dashboard/'  # after login, go to dashboard
+LOGOUT_REDIRECT_URL = '/accounts/login/'  # after logout, go to login
