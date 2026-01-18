@@ -98,8 +98,10 @@ def dashboard(request):
     thirty_days_ago = timezone.now() - timedelta(days=30)
     new_shareholders = Shareholder.objects.filter(created_at__gte=thirty_days_ago).count()
 
-    # Recent transactions
-    recent_transactions = Transaction.objects.select_related('shareholder').order_by('-created_at')[:5]
+    # Recent transactions - only select the fields we need
+    recent_transactions = Transaction.objects.select_related('shareholder').only(
+        'id', 'created_at', 'transaction_type', 'shares', 'status', 'shareholder__full_name'
+    ).order_by('-created_at')[:5]
 
     # Upcoming events demo
     upcoming_events = [
@@ -134,9 +136,83 @@ def dashboard(request):
 def share_register(request):
     return render(request, 'dashboard/share_register.html')
 
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.utils import timezone
+
+def generate_shareholder_id():
+    """Generate a unique shareholder ID in the format SH-YYYYMMDD-XXXXXX"""
+    from datetime import datetime
+    import random
+    import string
+    date_str = datetime.now().strftime("%Y%m%d")
+    random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    return f"SH-{date_str}-{random_str}"
+
 @login_required
 def shareholders_page(request):
+    if request.method == 'POST':
+        try:
+            # Get form data
+            full_name = request.POST.get('full_name')
+            id_number = request.POST.get('id_number')
+            use_custom_id = request.POST.get('use_custom_id') == 'on'
+            
+            # Generate ID if not using custom ID or if custom ID is empty
+            if not use_custom_id or not id_number:
+                id_number = generate_shareholder_id()
+                # Ensure the generated ID is unique
+                while Shareholder.objects.filter(id_number=id_number).exists():
+                    id_number = generate_shareholder_id()
+
+            # Get other fields
+            email = request.POST.get('email')
+            phone_number = request.POST.get('phone_number')
+            date_of_birth = request.POST.get('date_of_birth')
+            gender = request.POST.get('gender')
+            address = request.POST.get('address')
+            city = request.POST.get('city')
+            country = request.POST.get('country')
+            postal_code = request.POST.get('postal_code')
+            share_certificate_number = request.POST.get('share_certificate_number')
+            notes = request.POST.get('notes')
+
+            # Create new shareholder
+            shareholder = Shareholder.objects.create(
+                full_name=full_name,
+                id_number=id_number,
+                email=email,
+                phone_number=phone_number,
+                date_of_birth=date_of_birth if date_of_birth else None,
+                gender=gender,
+                address=address,
+                city=city,
+                country=country,
+                postal_code=postal_code,
+                share_certificate_number=share_certificate_number,
+                notes=notes,
+                created_by=request.user,
+                date_joined=timezone.now().date(),
+                is_active=True
+            )
+            
+            # Handle file upload
+            if 'photo' in request.FILES:
+                shareholder.photo = request.FILES['photo']
+                shareholder.save()
+            
+            messages.success(request, f'Shareholder added successfully! ID: {id_number}')
+            return redirect('dashboard:shareholders')
+            
+        except Exception as e:
+            messages.error(request, f'Error adding shareholder: {str(e)}')
+    
+    # GET request - show the list of shareholders
     shareholders = Shareholder.objects.all().order_by('full_name')
+    return render(request, 'dashboard/shareholders.html', {
+        'shareholders': shareholders,
+        'auto_generated_id': generate_shareholder_id()
+    })
     return render(request, 'dashboard/shareholders.html', {'shareholders': shareholders})
 
 @login_required

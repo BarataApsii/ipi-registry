@@ -154,23 +154,30 @@
                                     <td>#TXN-{{ txn.id|stringformat:"03d" }}</td>
                                     <td>{{ txn.shareholder.full_name }}</td>
                                     <td>
-                                        {% if txn.transaction_type == 'purchase' %}
+                                        {% if txn.transaction_type == 'PURCHASE' %}
                                             <span class="badge bg-success bg-opacity-10 text-success">Purchase</span>
-                                        {% elif txn.transaction_type == 'transfer' %}
-                                            <span class="badge bg-warning bg-opacity-10 text-warning">Transfer</span>
-                                        {% elif txn.transaction_type == 'sale' %}
-                                            <span class="badge bg-danger bg-opacity-10 text-danger">Sale</span>
+                                        {% elif txn.transaction_type == 'TRANSFER_IN' %}
+                                            <span class="badge bg-info bg-opacity-10 text-info">Transfer In</span>
+                                        {% elif txn.transaction_type == 'TRANSFER_OUT' %}
+                                            <span class="badge bg-warning bg-opacity-10 text-warning">Transfer Out</span>
+                                        {% elif txn.transaction_type == 'ISSUE' %}
+                                            <span class="badge bg-primary bg-opacity-10 text-primary">Issue</span>
+                                        {% elif txn.transaction_type == 'BUYBACK' %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger">Buyback</span>
                                         {% else %}
-                                            <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ txn.transaction_type|title }}</span>
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ txn.get_transaction_type_display|default:txn.transaction_type }}</span>
                                         {% endif %}
                                     </td>
-                                    <td class="text-end">{{ txn.shares }}</td>
+                                    <td class="text-end">{{ txn.shares|floatformat:2 }}</td>
                                     <td class="text-end">
-                                        {% if txn.status %}
-                                            <span class="badge bg-success">Completed</span>
-                                        {% else %}
-                                            <span class="badge bg-warning">Pending</span>
-                                        {% endif %}
+                                        <span class="badge 
+                                            {% if txn.status == 'COMPLETED' %}bg-success
+                                            {% elif txn.status == 'APPROVED' %}bg-primary
+                                            {% elif txn.status == 'PENDING' %}bg-warning
+                                            {% elif txn.status == 'REJECTED' or txn.status == 'CANCELLED' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ txn.get_status_display|default:txn.status|title }}
+                                        </span>
                                     </td>
                                 </tr>
                             {% empty %}
