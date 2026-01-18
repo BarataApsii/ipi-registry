@@ -1,10 +1,235 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
 
 {% block title %}Share Registry{% endblock %}
 
+{% block extra_css %}
+<style>
+    .summary-card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    .summary-card:hover {
+        transform: translateY(-5px);
+    }
+    .card-1 { background: linear-gradient(45deg, #4e73df, #224abe); }
+    .card-2 { background: linear-gradient(45deg, #1cc88a, #13855c); }
+    .card-3 { background: linear-gradient(45deg, #f6c23e, #dda20a); }
+    .card-4 { background: linear-gradient(45deg, #e74a3b, #be2617); }
+    .summary-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+    .table-responsive {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        padding: 20px;
+    }
+    .search-box {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .action-buttons .btn {
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+    .shareholder-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <h3>Share Registry</h3>
-    <p>This is a placeholder page for the Share Registry.</p>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Share Registry</h3>
+        <button class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Transaction
+        </button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="summary-card card-1">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total Shares</h6>
+                        <h3 class="mb-0">1,250,000</h3>
+                    </div>
+                    <i class="fas fa-chart-pie summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 3.48%</span>
+                    <span>Since last month</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card card-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Shareholders</h6>
+                        <h3 class="mb-0">248</h3>
+                    </div>
+                    <i class="fas fa-users summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 5.2%</span>
+                    <span>Since last month</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card card-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Active Transfers</h6>
+                        <h3 class="mb-0">12</h3>
+                    </div>
+                    <i class="fas fa-exchange-alt summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-down"></i> 2.1%</span>
+                    <span>Since last week</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card card-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Pending Approvals</h6>
+                        <h3 class="mb-0">8</h3>
+                    </div>
+                    <i class="fas fa-clock summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 1.5%</span>
+                    <span>Since yesterday</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="search-box">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Search shareholders, share numbers...">
+                    <button class="btn btn-outline-secondary" type="button">Search</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-filter"></i></span>
+                    <select class="form-select">
+                        <option selected>Filter by Share Class</option>
+                        <option>Ordinary Shares</option>
+                        <option>Preference Shares</option>
+                        <option>Founder Shares</option>
+                    </select>
+                    <button class="btn btn-outline-secondary" type="button">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Register Table -->
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Share Register</h5>
+            <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-download me-1"></i> Export
+                </button>
+                <button class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-print me-1"></i> Print
+                </button>
+            </div>
+        </div>
+        
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Shareholder</th>
+                    <th>Share Class</th>
+                    <th>Share Number</th>
+                    <th>Certificate #</th>
+                    <th>Acquisition Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Sample row - replace with Django template logic -->
+                <tr>
+                    <td>1</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="{% static 'dashboard/ipi_logo.png' %}" alt="User" class="shareholder-avatar">
+                            <span>John Doe</span>
+                        </div>
+                    </td>
+                    <td>Ordinary</td>
+                    <td>ORD-1001</td>
+                    <td>CERT-2023-001</td>
+                    <td>2023-10-15</td>
+                    <td><span class="badge bg-success">Active</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+                <!-- More rows would be dynamically generated -->
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any JavaScript functionality here
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
 {% endblock %}

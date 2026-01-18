@@ -1,8 +1,34 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
+
 {% block title %}Dashboard{% endblock %}
 
+{% block extra_css %}
+<style>
+    .summary-card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    .summary-card:hover {
+        transform: translateY(-5px);
+    }
+    .card-1 { background: linear-gradient(45deg, #4e73df, #224abe); }
+    .card-2 { background: linear-gradient(45deg, #1cc88a, #13855c); }
+    .card-3 { background: linear-gradient(45deg, #36b9cc, #258391); }
+    .card-4 { background: linear-gradient(45deg, #f6c23e, #dda20a); }
+    .summary-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="dashboard-container">
+<div class="container-fluid py-4">
     <!-- Welcome -->
     <div class="welcome-section mb-4">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -14,56 +40,64 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="row mb-4 g-3">
+    <div class="row mb-4">
         <div class="col-xl-3 col-md-6">
-            <div class="card stat-card">
-                <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="summary-card card-1">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase text-muted mb-1">Total Shareholders</h6>
-                        <h2>{{ total_shareholders }}</h2>
+                        <h6 class="text-uppercase mb-1">Total Shareholders</h6>
+                        <h3 class="mb-0">{{ total_shareholders }}</h3>
                     </div>
-                    <div class="stat-icon bg-primary-light">
-                        <i class="fas fa-users text-primary"></i>
-                    </div>
+                    <i class="fas fa-users summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 12.5%</span>
+                    <span>Since last quarter</span>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card stat-card">
-                <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="summary-card card-2">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase text-muted mb-1">Total Directors</h6>
-                        <h2>{{ total_directors }}</h2>
+                        <h6 class="text-uppercase mb-1">Total Directors</h6>
+                        <h3 class="mb-0">{{ total_directors }}</h3>
                     </div>
-                    <div class="stat-icon bg-success-light">
-                        <i class="fas fa-user-tie text-success"></i>
-                    </div>
+                    <i class="fas fa-user-tie summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 5.2%</span>
+                    <span>Since last quarter</span>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card stat-card">
-                <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="summary-card card-3">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase text-muted mb-1">Total Shares</h6>
-                        <h2>{{ total_shares|floatformat:0 }}</h2>
+                        <h6 class="text-uppercase mb-1">Total Shares</h6>
+                        <h3 class="mb-0">{{ total_shares|floatformat:0 }}</h3>
                     </div>
-                    <div class="stat-icon bg-warning-light">
-                        <i class="fas fa-chart-pie text-warning"></i>
-                    </div>
+                    <i class="fas fa-chart-pie summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 8.7%</span>
+                    <span>Since last quarter</span>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card stat-card">
-                <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="summary-card card-4">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase text-muted mb-1">New (30d)</h6>
-                        <h2>{{ new_shareholders }}</h2>
+                        <h6 class="text-uppercase mb-1">New (30d)</h6>
+                        <h3 class="mb-0">{{ new_shareholders }}</h3>
                     </div>
-                    <div class="stat-icon bg-info-light">
-                        <i class="fas fa-user-plus text-info"></i>
-                    </div>
+                    <i class="fas fa-user-plus summary-icon"></i>
+                </div>
+                <div class="mt-3 text-sm">
+                    <span class="me-2"><i class="fas fa-arrow-up"></i> 15.3%</span>
+                    <span>Since last month</span>
                 </div>
             </div>
         </div>

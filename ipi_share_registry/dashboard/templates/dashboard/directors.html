@@ -1,31 +1,459 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
 
 {% block title %}Directors{% endblock %}
 
+{% block extra_css %}
+<style>
+    .director-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .director-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .director-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin: -50px auto 15px;
+        display: block;
+    }
+    .director-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        height: 100px;
+        border-radius: 10px 10px 0 0;
+        position: relative;
+    }
+    .director-body {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .director-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    .director-position {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    .director-details {
+        margin-bottom: 15px;
+        flex: 1;
+    }
+    .detail-item {
+        display: flex;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+        min-width: 100px;
+    }
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .status-active { background-color: #d1e7dd; color: #0f5132; }
+    .status-inactive { background-color: #f8d7da; color: #842029; }
+    .status-pending { background-color: #fff3cd; color: #664d03; }
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #4e73df;
+        margin: 10px 0;
+    }
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <h3>Directors</h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Full Name</th>
-                <th>Position</th>
-                <th>Company</th>
-                <th>Appointed Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for director in directors %}
-            <tr>
-                <td>{{ director.full_name }}</td>
-                <td>{{ director.position }}</td>
-                <td>{{ director.company.name }}</td>
-                <td>{{ director.appointed_date|date:"M d, Y" }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="4" class="text-center">No directors found.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Board of Directors</h3>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDirectorModal">
+            <i class="fas fa-user-plus me-2"></i>Add Director
+        </button>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                <div class="stats-number">{{ directors|length }}</div>
+                <div class="stats-label">Total Directors</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-user-check fa-2x text-success mb-2"></i>
+                <div class="stats-number">{{ active_directors_count|default:"0" }}</div>
+                <div class="stats-label">Active Directors</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                <div class="stats-number">{{ new_directors_this_year|default:"0" }}</div>
+                <div class="stats-label">New This Year</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
+                <div class="stats-number">{{ average_tenure|default:"0" }}<small>yrs</small></div>
+                <div class="stats-label">Avg. Tenure</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Search directors..." id="searchDirectors">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="pending">Pending Approval</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="companyFilter">
+                        <option value="">All Companies</option>
+                        {% for company in companies %}
+                        <option value="{{ company.id }}">{{ company.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" id="resetFilters">
+                        <i class="fas fa-sync-alt me-1"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Directors Grid -->
+    <div class="row" id="directorsGrid">
+        {% for director in directors %}
+        <div class="col-md-6 col-lg-4 col-xl-3 mb-4 director-item" 
+             data-status="{{ director.is_active|yesno:'active,inactive' }}"
+             data-company="{{ director.company.id }}">
+            <div class="director-card h-100">
+                <div class="director-header"></div>
+                <img src="{% if director.photo %}{{ director.photo.url }}{% else %}{% static 'dashboard/default-avatar.png' %}{% endif %}" 
+                     alt="{{ director.full_name }}" class="director-avatar">
+                <div class="director-body">
+                    <h5 class="director-name">{{ director.full_name }}</h5>
+                    <div class="director-position">{{ director.position }}</div>
+                    
+                    <div class="director-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Company:</span>
+                            <span>{{ director.company.name }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Appointed:</span>
+                            <span>{{ director.appointed_date|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="status-badge status-{% if director.is_active %}active{% else %}inactive{% endif %}">
+                                {% if director.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                        {% if director.term_expires %}
+                        <div class="detail-item">
+                            <span class="detail-label">Term Ends:</span>
+                            <span>{{ director.term_expires|date:"M d, Y" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mt-auto pt-3 border-top">
+                        <div class="btn-group w-100">
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    onclick="viewDirector({{ director.id }})">
+                                <i class="fas fa-eye me-1"></i> View
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    onclick="editDirector({{ director.id }})">
+                                <i class="fas fa-edit me-1"></i> Edit
+                            </button>
+                            {% if director.is_active %}
+                            <button class="btn btn-sm btn-outline-danger"
+                                    onclick="confirmDeactivate({{ director.id }})">
+                                <i class="fas fa-user-times me-1"></i> Deactivate
+                            </button>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-success"
+                                    onclick="activateDirector({{ director.id }})">
+                                <i class="fas fa-user-check me-1"></i> Activate
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4>No Directors Found</h4>
+                <p class="text-muted">Get started by adding a new director to the board.</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDirectorModal">
+                    <i class="fas fa-user-plus me-2"></i>Add Director
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+
+<!-- Add Director Modal -->
+<div class="modal fade" id="addDirectorModal" tabindex="-1" aria-labelledby="addDirectorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addDirectorModalLabel">Add New Director</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addDirectorForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="mb-3">
+                                <div class="position-relative d-inline-block">
+                                    <img id="directorPhotoPreview" src="{% static 'dashboard/default-avatar.png' %}" 
+                                         class="rounded-circle" width="150" height="150" 
+                                         style="object-fit: cover; border: 3px solid #e9ecef; cursor: pointer;"
+                                         onclick="document.getElementById('directorPhoto').click()">
+                                    <div class="position-absolute bottom-0 end-0 bg-primary rounded-circle p-2" 
+                                         style="cursor: pointer;"
+                                         onclick="document.getElementById('directorPhoto').click()">
+                                        <i class="fas fa-camera text-white"></i>
+                                    </div>
+                                </div>
+                                <input type="file" class="d-none" id="directorPhoto" name="photo" accept="image/*">
+                                <div class="form-text">Click to upload photo</div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="firstName" name="first_name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="lastName" name="last_name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="position" class="form-label">Position <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="position" name="position" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="company" class="form-label">Company <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="company" name="company" required>
+                                        <option value="">Select Company</option>
+                                        {% for company in companies %}
+                                        <option value="{{ company.id }}">{{ company.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="appointedDate" class="form-label">Appointed Date <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="appointedDate" name="appointed_date" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="termExpires" class="form-label">Term Expires</label>
+                                    <input type="date" class="form-control" id="termExpires" name="term_expires">
+                                </div>
+                                <div class="col-12">
+                                    <label for="bio" class="form-label">Biography</label>
+                                    <textarea class="form-control" id="bio" name="bio" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save Director
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Set today's date as default for appointed date
+        document.getElementById('appointedDate').valueAsDate = new Date();
+
+        // Photo preview
+        document.getElementById('directorPhoto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('directorPhotoPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Search functionality
+        document.getElementById('searchDirectors').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const directorItems = document.querySelectorAll('.director-item');
+            
+            directorItems.forEach(item => {
+                const name = item.querySelector('.director-name').textContent.toLowerCase();
+                const position = item.querySelector('.director-position').textContent.toLowerCase();
+                const company = item.querySelector('.director-details .detail-item:first-child span:last-child').textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || position.includes(searchTerm) || company.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Filter by status
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            const status = this.value;
+            const directorItems = document.querySelectorAll('.director-item');
+            
+            directorItems.forEach(item => {
+                const itemStatus = item.getAttribute('data-status');
+                if (!status || itemStatus === status) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Filter by company
+        document.getElementById('companyFilter').addEventListener('change', function() {
+            const companyId = this.value;
+            const directorItems = document.querySelectorAll('.director-item');
+            
+            directorItems.forEach(item => {
+                const itemCompanyId = item.getAttribute('data-company');
+                if (!companyId || itemCompanyId === companyId) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Reset filters
+        document.getElementById('resetFilters').addEventListener('click', function() {
+            document.getElementById('searchDirectors').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('companyFilter').value = '';
+            
+            const directorItems = document.querySelectorAll('.director-item');
+            directorItems.forEach(item => {
+                item.style.display = '';
+            });
+        });
+
+        // Form submission
+        document.getElementById('addDirectorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // In a real app, you would submit the form via AJAX
+            alert('Director added successfully!');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addDirectorModal'));
+            modal.hide();
+            // Reload the page or update the UI as needed
+            location.reload();
+        });
+    });
+
+    // View director details
+    function viewDirector(id) {
+        // In a real app, this would open a modal with director details
+        window.location.href = `/dashboard/directors/${id}/`;
+    }
+
+    // Edit director
+    function editDirector(id) {
+        // In a real app, this would open an edit modal or redirect to edit page
+        window.location.href = `/dashboard/directors/${id}/edit/`;
+    }
+
+    // Confirm deactivation
+    function confirmDeactivate(id) {
+        if (confirm('Are you sure you want to deactivate this director?')) {
+            // In a real app, this would make an API call to deactivate the director
+            alert('Director deactivated successfully!');
+            location.reload();
+        }
+    }
+
+    // Activate director
+    function activateDirector(id) {
+        // In a real app, this would make an API call to activate the director
+        alert('Director activated successfully!');
+        location.reload();
+    }
+</script>
 {% endblock %}
