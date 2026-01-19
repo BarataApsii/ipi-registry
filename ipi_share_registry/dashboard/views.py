@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
 
@@ -22,8 +22,7 @@ def is_admin(user):
 @user_passes_test(is_admin)
 def user_list(request):
     users = User.objects.all().order_by('username')
-    groups = Group.objects.all()
-    return render(request, 'dashboard/user_list.html', {'users': users, 'groups': groups})
+    return render(request, 'dashboard/user_list.html', {'users': users})
 
 @login_required
 @user_passes_test(is_admin)
@@ -31,8 +30,6 @@ def user_add(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-        group_name = request.POST.get("group")
-
         if not username or not password:
             messages.error(request, "Username and password are required.")
             return redirect("dashboard:user_add")
@@ -41,48 +38,30 @@ def user_add(request):
             messages.error(request, "Username already exists.")
             return redirect("dashboard:user_add")
 
-        user = User.objects.create_user(username=username, password=password, is_staff=True)
-        if group_name:
-            try:
-                group = Group.objects.get(name=group_name)
-                user.groups.add(group)
-            except Group.DoesNotExist:
-                messages.warning(request, "Selected group does not exist.")
-
+        User.objects.create_user(username=username, password=password, is_staff=True)
         messages.success(request, "User created successfully.")
         return redirect("dashboard:user_list")
 
-    groups = Group.objects.all()
-    return render(request, "dashboard/user_add.html", {"groups": groups})
+    return render(request, "dashboard/user_add.html")
 
 @login_required
 @user_passes_test(is_admin)
 def user_edit(request, user_id):
     user = User.objects.get(id=user_id)
-    groups = Group.objects.all()
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-        group_name = request.POST.get("group")
 
         if username:
             user.username = username
         if password:
             user.set_password(password)
 
-        user.groups.clear()
-        if group_name:
-            try:
-                group = Group.objects.get(name=group_name)
-                user.groups.add(group)
-            except Group.DoesNotExist:
-                messages.warning(request, "Selected group does not exist.")
-
         user.save()
         messages.success(request, "User updated successfully.")
         return redirect("dashboard:user_list")
 
-    return render(request, "dashboard/user_edit.html", {"user": user, "groups": groups})
+    return render(request, "dashboard/user_edit.html", {"user": user})
 
 # -------------------------
 # DASHBOARD

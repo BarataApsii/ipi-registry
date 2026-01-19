@@ -14,17 +14,8 @@
             <input type="text" name="last_name" class="form-control" value="{{ user_obj.last_name }}">
         </div>
         <div class="mb-3">
-            <label class="form-label">Password (leave blank to keep current)</label>
+            <label class="form-label">Password (leave blank to keep current password)</label>
             <input type="password" name="password" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Group / Role</label>
-            <select name="group" class="form-select">
-                <option value="">-- Select Group --</option>
-                {% for group in groups %}
-                <option value="{{ group.id }}" {% if group in user_obj.groups.all %}selected{% endif %}>{{ group.name }}</option>
-                {% endfor %}
-            </select>
         </div>
         <button class="btn btn-success">Update User</button>
     </form>

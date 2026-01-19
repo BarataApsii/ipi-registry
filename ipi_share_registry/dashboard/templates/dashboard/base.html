@@ -181,6 +181,11 @@
 
             <div class="menu-section">
                 <div class="menu-section-title">System</div>
+                {% if request.user.is_superuser %}
+                <a href="{% url 'dashboard:user_list' %}" class="{% if 'user_' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-users-cog"></i> User Management
+                </a>
+                {% endif %}
                 <a href="{% url 'dashboard:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
                     <i class="fas fa-cog"></i> Settings
                 </a>
