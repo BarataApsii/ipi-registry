@@ -1,0 +1,321 @@
+{% extends 'shareholders/base.html' %}
+
+{% block title %}{{ shareholder.full_name }} - Shareholder Details{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">{{ shareholder.full_name }}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'shareholders:shareholder_list' %}">Shareholders</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ shareholder.full_name }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="btn-group">
+        <a href="{% url 'shareholders:shareholder_edit' shareholder.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i> Edit
+        </a>
+        <a href="{% url 'shareholders:shareholder_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Shareholder Information</h5>
+                {% if shareholder.is_active %}
+                    <span class="badge bg-success">Active</span>
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    {% if shareholder.photo %}
+                        <img src="{{ shareholder.photo.url }}" alt="{{ shareholder.full_name }}" 
+                             class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center bg-light rounded-circle mb-3" 
+                             style="width: 150px; height: 150px; margin: 0 auto;">
+                            <i class="bi bi-person text-muted" style="font-size: 4rem;"></i>
+                        </div>
+                    {% endif %}
+                    <h4>{{ shareholder.full_name }}</h4>
+                    <p class="text-muted">ID: {{ shareholder.id_number }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-uppercase text-muted small mb-2">Personal Information</h6>
+                    <ul class="list-unstyled mb-0">
+                        {% if shareholder.date_of_birth %}
+                            <li class="mb-1">
+                                <i class="bi bi-calendar3 me-2 text-muted"></i>
+                                <strong>Date of Birth:</strong> {{ shareholder.date_of_birth|date:"F j, Y" }}
+                            </li>
+                        {% endif %}
+                        {% if shareholder.gender %}
+                            <li class="mb-1">
+                                <i class="bi bi-gender-ambiguous me-2 text-muted"></i>
+                                <strong>Gender:</strong> {{ shareholder.get_gender_display }}
+                            </li>
+                        {% endif %}
+                        {% if shareholder.nationality %}
+                            <li class="mb-1">
+                                <i class="bi bi-globe me-2 text-muted"></i>
+                                <strong>Nationality:</strong> {{ shareholder.nationality }}
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-uppercase text-muted small mb-2">Contact Information</h6>
+                    <ul class="list-unstyled mb-0">
+                        {% if shareholder.email %}
+                            <li class="mb-1">
+                                <i class="bi bi-envelope me-2 text-muted"></i>
+                                <a href="mailto:{{ shareholder.email }}" class="text-decoration-none">
+                                    {{ shareholder.email }}
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if shareholder.phone_number %}
+                            <li class="mb-1">
+                                <i class="bi bi-telephone me-2 text-muted"></i>
+                                <a href="tel:{{ shareholder.phone_number }}" class="text-decoration-none">
+                                    {{ shareholder.phone_number }}
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if shareholder.address %}
+                            <li class="mb-1">
+                                <i class="bi bi-geo-alt me-2 text-muted"></i>
+                                {{ shareholder.full_address }}
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                {% if shareholder.notes %}
+                <div class="mb-3">
+                    <h6 class="text-uppercase text-muted small mb-2">Notes</h6>
+                    <div class="p-3 bg-light rounded">
+                        {{ shareholder.notes|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Share Information</h5>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add Transaction
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-4">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded">
+                            <h3 class="mb-0">{{ shareholder.total_shares|default:0|floatformat:0 }}</h3>
+                            <small class="text-muted">Total Shares</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded">
+                            <h3 class="mb-0">{{ shareholder.share_certificate_number|default:"N/A" }}</h3>
+                            <small class="text-muted">Certificate Number</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded">
+                            <h3 class="mb-0">{{ shareholder.date_joined|date:"M j, Y" }}</h3>
+                            <small class="text-muted">Date Joined</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5 class="mb-3">Recent Transactions</h5>
+                {% if transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Shares</th>
+                                    <th class="text-end">Price/Share</th>
+                                    <th class="text-end">Total Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                <tr>
+                                    <td>{{ transaction.transaction_date|date:"M j, Y" }}</td>
+                                    <td>{{ transaction.get_transaction_type_display }}</td>
+                                    <td class="text-end">{{ transaction.shares|floatformat:2 }}</td>
+                                    <td class="text-end">
+                                        {% if transaction.price_per_share %}
+                                            ${{ transaction.price_per_share|floatformat:2 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        {% if transaction.total_amount %}
+                                            ${{ transaction.total_amount|floatformat:2 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if transaction.status == 'COMPLETED' %}bg-success{% elif transaction.status == 'PENDING' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            {{ transaction.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-outline-secondary" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end">
+                        <a href="#" class="btn btn-sm btn-outline-primary">View All Transactions</a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <div class="text-muted mb-3">
+                            <i class="bi bi-arrow-repeat" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No transactions found for this shareholder.</p>
+                        </div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
+                            <i class="bi bi-plus-lg me-1"></i> Add First Transaction
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Documents Card -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Documents</h5>
+                <button class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-upload me-1"></i> Upload Document
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-4">
+                    <div class="text-muted mb-3">
+                        <i class="bi bi-folder2-open" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0">No documents uploaded yet.</p>
+                    </div>
+                    <button class="btn btn-outline-primary">
+                        <i class="bi bi-upload me-1"></i> Upload Document
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Transaction Modal -->
+<div class="modal fade" id="addTransactionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="transactionType" class="form-label">Transaction Type</label>
+                            <select class="form-select" id="transactionType" required>
+                                <option value="" selected disabled>Select type...</option>
+                                <option value="ISSUE">Share Issue</option>
+                                <option value="PURCHASE">Share Purchase</option>
+                                <option value="TRANSFER_IN">Transfer In</option>
+                                <option value="BONUS">Bonus Issue</option>
+                                <option value="RIGHTS">Rights Issue</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="transactionDate" class="form-label">Transaction Date</label>
+                            <input type="date" class="form-control" id="transactionDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="shares" class="form-label">Number of Shares</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0.01" class="form-control" id="shares" required>
+                                <span class="input-group-text">shares</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="pricePerShare" class="form-label">Price per Share</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="pricePerShare">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Save Transaction</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize any JavaScript specific to this page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize any date pickers or other JS functionality
+        
+        // Example: Calculate total amount when price or shares change
+        const priceInput = document.getElementById('pricePerShare');
+        const sharesInput = document.getElementById('shares');
+        
+        function calculateTotal() {
+            const price = parseFloat(priceInput.value) || 0;
+            const shares = parseFloat(sharesInput.value) || 0;
+            const total = price * shares;
+            // Update the total amount field if it exists
+            const totalField = document.getElementById('totalAmount');
+            if (totalField) {
+                totalField.textContent = '$' + total.toFixed(2);
+            }
+        }
+        
+        if (priceInput && sharesInput) {
+            priceInput.addEventListener('input', calculateTotal);
+            sharesInput.addEventListener('input', calculateTotal);
+        }
+    });
+</script>
+{% endblock %}

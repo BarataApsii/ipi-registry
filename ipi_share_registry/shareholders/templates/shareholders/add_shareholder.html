@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Add New Shareholder</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" action="{% url 'shareholders:add_shareholder' %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Personal Information</h5>
+                                <div class="mb-3">
+                                    {{ form.full_name.label_tag }}
+                                    {{ form.full_name }}
+                                    <div class="text-danger">{{ form.full_name.errors }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.id_number.label_tag }}
+                                    {{ form.id_number }}
+                                    <div class="text-danger">{{ form.id_number.errors }}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.date_of_birth.label_tag }}
+                                            {{ form.date_of_birth }}
+                                            <div class="text-danger">{{ form.date_of_birth.errors }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.gender.label_tag }}
+                                            {{ form.gender }}
+                                            <div class="text-danger">{{ form.gender.errors }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.nationality.label_tag }}
+                                    {{ form.nationality }}
+                                    <div class="text-danger">{{ form.nationality.errors }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Contact Information</h5>
+                                <div class="mb-3">
+                                    {{ form.email.label_tag }}
+                                    {{ form.email }}
+                                    <div class="text-danger">{{ form.email.errors }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.phone_number.label_tag }}
+                                    {{ form.phone_number }}
+                                    <div class="text-danger">{{ form.phone_number.errors }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.address.label_tag }}
+                                    {{ form.address }}
+                                    <div class="text-danger">{{ form.address.errors }}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.city.label_tag }}
+                                            {{ form.city }}
+                                            <div class="text-danger">{{ form.city.errors }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.country.label_tag }}
+                                            {{ form.country }}
+                                            <div class="text-danger">{{ form.country.errors }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.postal_code.label_tag }}
+                                    {{ form.postal_code }}
+                                    <div class="text-danger">{{ form.postal_code.errors }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Additional Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.share_certificate_number.label_tag }}
+                                            {{ form.share_certificate_number }}
+                                            <div class="text-danger">{{ form.share_certificate_number.errors }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.photo.label_tag }}
+                                            {{ form.photo }}
+                                            <div class="text-danger">{{ form.photo.errors }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.notes.label_tag }}
+                                    {{ form.notes }}
+                                    <div class="text-danger">{{ form.notes.errors }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'shareholders:home' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Shareholder</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

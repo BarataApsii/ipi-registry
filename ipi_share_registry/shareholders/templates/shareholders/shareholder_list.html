@@ -1,0 +1,156 @@
+{% extends 'shareholders/base.html' %}
+
+{% block title %}Shareholders - Share Registry{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3">Shareholders</h1>
+    <a href="{% url 'shareholders:shareholder_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Add New Shareholder
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>All Shareholders</span>
+        <form class="d-flex" method="get" action=".">
+            <input class="form-control form-control-sm me-2" type="search" name="q" value="{{ request.GET.q }}" placeholder="Search shareholders...">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">Search</button>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>ID Number</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Shares</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for shareholder in shareholders %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'shareholders:shareholder_detail' shareholder.pk %}" class="text-decoration-none">
+                                {{ shareholder.full_name }}
+                            </a>
+                        </td>
+                        <td>{{ shareholder.id_number }}</td>
+                        <td>{{ shareholder.email|default:"-" }}</td>
+                        <td>{{ shareholder.phone_number|default:"-" }}</td>
+                        <td>{{ shareholder.total_shares|default:0 }}</td>
+                        <td>
+                            {% if shareholder.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'shareholders:shareholder_detail' shareholder.pk %}" 
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'shareholders:shareholder_edit' shareholder.pk %}" 
+                                   class="btn btn-sm btn-outline-secondary"
+                                   title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-danger" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal{{ shareholder.pk }}"
+                                        title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ shareholder.pk }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm Deletion</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete shareholder <strong>{{ shareholder.full_name }}</strong>?</p>
+                                            <p class="text-danger">This action cannot be undone.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{% url 'shareholders:shareholder_delete' shareholder.pk %}" method="post">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <div class="text-muted">No shareholders found. <a href="{% url 'shareholders:shareholder_create' %}">Add a new shareholder</a> to get started.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if is_paginated %}
+    <div class="card-footer">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

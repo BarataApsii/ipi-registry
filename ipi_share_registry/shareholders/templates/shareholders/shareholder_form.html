@@ -1,0 +1,306 @@
+{% extends 'shareholders/base.html' %}
+
+{% block title %}{{ title }} - Share Registry{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="h5 mb-0">{{ title }}</h2>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Please correct the following errors:</strong>
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field|title }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="border-bottom pb-2 mb-3">Personal Information</h5>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="id_full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                {{ form.full_name }}
+                                {% if form.full_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.full_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_id_number" class="form-label">ID/Passport Number <span class="text-danger">*</span></label>
+                                {{ form.id_number }}
+                                {% if form.id_number.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.id_number.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_date_of_birth" class="form-label">Date of Birth</label>
+                                {{ form.date_of_birth }}
+                                {% if form.date_of_birth.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.date_of_birth.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_gender" class="form-label">Gender</label>
+                                {{ form.gender }}
+                                {% if form.gender.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.gender.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_nationality" class="form-label">Nationality</label>
+                                {{ form.nationality }}
+                                {% if form.nationality.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.nationality.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="id_photo" class="form-label">Photo</label>
+                                {{ form.photo }}
+                                {% if form.photo.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.photo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                {% if form.instance.photo %}
+                                    <div class="mt-2">
+                                        <img src="{{ form.instance.photo.url }}" alt="Profile Photo" class="img-thumbnail" style="max-height: 100px;">
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5 class="border-bottom pb-2 mb-3">Contact Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_email" class="form-label">Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_phone_number" class="form-label">Phone Number</label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.phone_number.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="id_address" class="form-label">Address</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.address.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="id_city" class="form-label">City</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.city.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="id_country" class="form-label">Country</label>
+                                {{ form.country }}
+                                {% if form.country.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.country.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="id_postal_code" class="form-label">Postal Code</label>
+                                {{ form.postal_code }}
+                                {% if form.postal_code.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.postal_code.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <h5 class="border-bottom pb-2 mb-3">Share Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_share_certificate_number" class="form-label">Share Certificate Number</label>
+                                {{ form.share_certificate_number }}
+                                {% if form.share_certificate_number.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.share_certificate_number.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_total_shares" class="form-label">Total Shares</label>
+                                <div class="input-group">
+                                    {{ form.total_shares }}
+                                    <span class="input-group-text">shares</span>
+                                </div>
+                                {% if form.total_shares.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.total_shares.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="id_notes" class="form-label">Notes</label>
+                                {{ form.notes }}
+                                {% if form.notes.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.notes.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{% if form.instance.pk %}{% url 'shareholders:shareholder_detail' form.instance.pk %}{% else %}{% url 'shareholders:shareholder_list' %}{% endif %}" 
+                   class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+                <div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Save Shareholder
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Add some additional styling for form controls */
+    .form-control, .form-select {
+        border-radius: 0.25rem;
+    }
+    
+    /* Style the file input to match other form controls */
+    .form-control[type="file"] {
+        padding: 0.375rem 0.75rem;
+    }
+    
+    /* Add some spacing between form groups */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    /* Style the form sections */
+    h5 {
+        color: #495057;
+        font-weight: 600;
+        margin-top: 1.5rem;
+    }
+    
+    /* Style the required field indicator */
+    .required label:after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+
+<script>
+    // Add Bootstrap validation classes on form submission
+    (function() {
+        'use strict';
+        
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation');
+        
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

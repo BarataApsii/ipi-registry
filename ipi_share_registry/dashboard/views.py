@@ -132,9 +132,15 @@ def generate_shareholder_id():
 def shareholders_page(request):
     if request.method == 'POST':
         try:
-            # Get form data
-            full_name = request.POST.get('full_name')
-            id_number = request.POST.get('id_number')
+            # Debug: Print form data
+            print("Form data:", request.POST)
+            print("Files:", request.FILES)
+            
+            # Get form data with proper defaults
+            first_name = request.POST.get('first_name', '').strip()
+            last_name = request.POST.get('last_name', '').strip()
+            full_name = f"{first_name} {last_name}".strip()
+            id_number = request.POST.get('id_number', '').strip()
             use_custom_id = request.POST.get('use_custom_id') == 'on'
             
             # Generate ID if not using custom ID or if custom ID is empty
@@ -144,30 +150,39 @@ def shareholders_page(request):
                 while Shareholder.objects.filter(id_number=id_number).exists():
                     id_number = generate_shareholder_id()
 
-            # Get other fields
-            email = request.POST.get('email')
-            phone_number = request.POST.get('phone_number')
+            # Get other fields with proper defaults
+            email = request.POST.get('email', '').strip()
+            phone_number = request.POST.get('phone', '').strip()
+            total_shares = int(request.POST.get('total_shares', 0) or 0)
+            address = request.POST.get('address', '').strip()
+            city = request.POST.get('city', '').strip()
+            country = request.POST.get('country', '').strip()
+            postal_code = request.POST.get('postal_code', '').strip()
             date_of_birth = request.POST.get('date_of_birth')
-            gender = request.POST.get('gender')
-            address = request.POST.get('address')
-            city = request.POST.get('city')
-            country = request.POST.get('country')
-            postal_code = request.POST.get('postal_code')
-            share_certificate_number = request.POST.get('share_certificate_number')
-            notes = request.POST.get('notes')
+            gender = request.POST.get('gender', '').strip()
+            nationality = request.POST.get('nationality', '').strip()
+            share_certificate_number = request.POST.get('share_certificate_number', '').strip()
+            notes = request.POST.get('notes', '').strip()
+
+            # Get or create company
+            from shareholders.models import Company
+            company = Company.get_company()
 
             # Create new shareholder
-            shareholder = Shareholder.objects.create(
+            shareholder = Shareholder(
+                company=company,
                 full_name=full_name,
                 id_number=id_number,
                 email=email,
                 phone_number=phone_number,
-                date_of_birth=date_of_birth if date_of_birth else None,
-                gender=gender,
+                total_shares=total_shares,
                 address=address,
                 city=city,
                 country=country,
                 postal_code=postal_code,
+                date_of_birth=date_of_birth if date_of_birth else None,
+                gender=gender if gender in dict(Shareholder.GENDER_CHOICES) else '',
+                nationality=nationality,
                 share_certificate_number=share_certificate_number,
                 notes=notes,
                 created_by=request.user,
@@ -178,12 +193,17 @@ def shareholders_page(request):
             # Handle file upload
             if 'photo' in request.FILES:
                 shareholder.photo = request.FILES['photo']
-                shareholder.save()
             
-            messages.success(request, f'Shareholder added successfully! ID: {id_number}')
+            # Save the shareholder
+            shareholder.save()
+            
+            messages.success(request, f'Shareholder {full_name} added successfully! ID: {id_number}')
             return redirect('dashboard:shareholders')
             
         except Exception as e:
+            import traceback
+            print("Error:", str(e))
+            print(traceback.format_exc())
             messages.error(request, f'Error adding shareholder: {str(e)}')
     
     # GET request - show the list of shareholders
