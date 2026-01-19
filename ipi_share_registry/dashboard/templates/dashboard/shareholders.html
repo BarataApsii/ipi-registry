@@ -1,5 +1,6 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Shareholders{% endblock %}
 
@@ -90,6 +91,29 @@
         border-radius: 50%;
         margin-right: 10px;
         object-fit: cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9ecef;
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+    
+    .shareholder-initials {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9ecef;
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
     }
     .status-badge {
         padding: 5px 10px;
@@ -151,7 +175,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase mb-1">Total Shares</h6>
-                        <h3 class="mb-0">1,250,000</h3>
+                        <h3 class="mb-0">{{ total_shares|floatformat:0|intcomma }}</h3>
                     </div>
                     <i class="fas fa-chart-pie summary-icon"></i>
                 </div>
@@ -166,7 +190,9 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase mb-1">Avg. Shares/Investor</h6>
-                        <h3 class="mb-0">{{ "5000"|floatformat:0 }}</h3>
+                        <h3 class="mb-0">
+                            {{ avg_shares|floatformat:0|intcomma }}
+                        </h3>
                     </div>
                     <i class="fas fa-chart-line summary-icon"></i>
                 </div>
@@ -226,7 +252,7 @@
                         <th>ID/Passport</th>
                         <th>Shares</th>
                         <th>Ownership %</th>
-                        <th>Contact</th>
+                        <th style="min-width: 180px;">Contact Information</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -237,7 +263,13 @@
                         <td>{{ forloop.counter }}</td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <img src="{% static 'dashboard/ipi_logo.png' %}" alt="Shareholder" class="shareholder-avatar">
+                                {% if shareholder.photo %}
+                                    <img src="{{ shareholder.photo.url }}" alt="{{ shareholder.full_name }}" class="shareholder-avatar">
+                                {% else %}
+                                    <div class="shareholder-initials">
+                                        {{ shareholder.get_initials }}
+                                    </div>
+                                {% endif %}
                                 <div>
                                     <div class="fw-bold">{{ shareholder.full_name }}</div>
                                     <small class="text-muted">{{ shareholder.company.name|default:"Individual" }}</small>
@@ -246,11 +278,31 @@
                         </td>
                         <td>{{ shareholder.id_number|default:"N/A" }}</td>
                         <td>{{ shareholder.total_shares|default:0|floatformat:0 }}</td>
-                        <td>{% widthratio shareholder.total_shares 1250000 100 %}%</td>
+                        <td>{{ shareholder.ownership_percentage|floatformat:2 }}%</td>
                         <td>
-                            <div class="text-nowrap">
-                                <div><i class="fas fa-envelope me-1 text-muted"></i> {{ shareholder.email|default:"N/A" }}</div>
-                                <div><i class="fas fa-phone me-1 text-muted"></i> {{ shareholder.phone|default:"N/A" }}</div>
+                            <div class="d-flex flex-column">
+                                {% if shareholder.email %}
+                                    <div class="mb-1">
+                                        <a href="mailto:{{ shareholder.email }}" class="text-decoration-none">
+                                            <i class="fas fa-envelope me-1 text-muted"></i>{{ shareholder.email }}
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <div class="text-muted small mb-1">
+                                        <i class="fas fa-envelope me-1"></i>No email
+                                    </div>
+                                {% endif %}
+                                {% if shareholder.phone_number %}
+                                    <div>
+                                        <a href="tel:{{ shareholder.phone_number }}" class="text-decoration-none">
+                                            <i class="fas fa-phone me-1 text-muted"></i>{{ shareholder.phone_number }}
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <div class="text-muted small">
+                                        <i class="fas fa-phone me-1"></i>No phone
+                                    </div>
+                                {% endif %}
                             </div>
                         </td>
                         <td>
@@ -384,8 +436,12 @@
                                     <input type="text" class="form-control" id="lastName" name="last_name" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="idNumber" class="form-label">ID/Passport Number <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="idNumber" name="id_number" required>
+                                    <label for="gender" class="form-label">Gender</label>
+                                    <select class="form-select" id="gender" name="gender">
+                                        <option value="">Select Gender</option>
+                                        <option value="M">Male</option>
+                                        <option value="F">Female</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="email" class="form-label">Email <span class="text-danger">*</span></label>

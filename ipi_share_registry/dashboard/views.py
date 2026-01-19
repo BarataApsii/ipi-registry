@@ -140,15 +140,11 @@ def shareholders_page(request):
             first_name = request.POST.get('first_name', '').strip()
             last_name = request.POST.get('last_name', '').strip()
             full_name = f"{first_name} {last_name}".strip()
-            id_number = request.POST.get('id_number', '').strip()
-            use_custom_id = request.POST.get('use_custom_id') == 'on'
             
-            # Generate ID if not using custom ID or if custom ID is empty
-            if not use_custom_id or not id_number:
+            # Always generate a unique ID
+            id_number = generate_shareholder_id()
+            while Shareholder.objects.filter(id_number=id_number).exists():
                 id_number = generate_shareholder_id()
-                # Ensure the generated ID is unique
-                while Shareholder.objects.filter(id_number=id_number).exists():
-                    id_number = generate_shareholder_id()
 
             # Get other fields with proper defaults
             email = request.POST.get('email', '').strip()
@@ -208,8 +204,21 @@ def shareholders_page(request):
     
     # GET request - show the list of shareholders
     shareholders = Shareholder.objects.all().order_by('full_name')
+    
+    # Calculate total shares and ownership percentages
+    total_shares = sum(shareholder.total_shares for shareholder in shareholders) or 1  # Avoid division by zero
+    
+    # Calculate average shares per investor
+    avg_shares = total_shares / len(shareholders) if shareholders else 0
+    
+    # Add ownership percentage to each shareholder
+    for shareholder in shareholders:
+        shareholder.ownership_percentage = (shareholder.total_shares / total_shares) * 100 if total_shares > 0 else 0
+    
     return render(request, 'dashboard/shareholders.html', {
         'shareholders': shareholders,
+        'total_shares': total_shares,
+        'avg_shares': avg_shares,
         'auto_generated_id': generate_shareholder_id()
     })
     return render(request, 'dashboard/shareholders.html', {'shareholders': shareholders})

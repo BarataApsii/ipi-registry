@@ -26,7 +26,7 @@
                         <th>Name</th>
                         <th>ID Number</th>
                         <th>Email</th>
-                        <th>Phone</th>
+                        <th>Phone Number</th>
                         <th>Shares</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -41,8 +41,24 @@
                             </a>
                         </td>
                         <td>{{ shareholder.id_number }}</td>
-                        <td>{{ shareholder.email|default:"-" }}</td>
-                        <td>{{ shareholder.phone_number|default:"-" }}</td>
+                        <td>
+                            {% if shareholder.email %}
+                                <a href="mailto:{{ shareholder.email }}" class="text-decoration-none">
+                                    {{ shareholder.email }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if shareholder.phone_number %}
+                                <a href="tel:{{ shareholder.phone_number }}" class="text-decoration-none">
+                                    {{ shareholder.phone_number }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
                         <td>{{ shareholder.total_shares|default:0 }}</td>
                         <td>
                             {% if shareholder.is_active %}

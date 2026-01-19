@@ -106,6 +106,15 @@ class Shareholder(models.Model):
 
     def __str__(self):
         return f"{self.full_name} ({self.id_number})"
+        
+    def get_initials(self):
+        """Return the initials of the shareholder for avatar display."""
+        if not self.full_name:
+            return "??"
+        names = self.full_name.split()
+        if len(names) >= 2:
+            return f"{names[0][0]}{names[-1][0]}".upper()
+        return self.full_name[:2].upper()
     
     def get_absolute_url(self):
         from django.urls import reverse
@@ -117,6 +126,13 @@ class Shareholder(models.Model):
 
 
 class Director(models.Model):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+        ('P', 'Prefer not to say'),
+    ]
+    
     DIRECTOR_TYPE_CHOICES = [
         ('EXECUTIVE', 'Executive Director'),
         ('NON_EXECUTIVE', 'Non-Executive Director'),
@@ -139,6 +155,12 @@ class Director(models.Model):
         related_name='director_profile'
     )
     full_name = models.CharField(max_length=255)
+    gender = models.CharField(
+        max_length=1, 
+        choices=GENDER_CHOICES, 
+        blank=True,
+        help_text="Gender of the director"
+    )
     director_type = models.CharField(
         max_length=20,
         choices=DIRECTOR_TYPE_CHOICES,
